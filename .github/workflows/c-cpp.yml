@@ -4,45 +4,32 @@ on:
   push:
     branches:
       - main
-  pull_request:
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.12'
+      - name: Setup Arduino CLI
+        uses: arduino/setup-arduino-cli@v3
+        with:
+          version: latest
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y git wget unzip
+      - name: Update index
+        run: arduino-cli core update-index
 
-    - name: Install Arduino CLI
-      run: |
-        wget https://downloads.arduino.cc/arduino-cli/arduino-cli_latest_Linux_64bit.tar.gz
-        tar -xzf arduino-cli_latest_Linux_64bit.tar.gz
-        sudo mv arduino-cli /usr/local/bin/
+      - name: Install ESP32 core
+        run: arduino-cli core install esp32:esp32
 
-    - name: Update Arduino core index
-      run: arduino-cli core update-index
+      - name: Compile project
+        run: arduino-cli compile --fqbn esp32:esp32:esp32s3 --output-dir build .
 
-    - name: Install ESP32 core
-      run: arduino-cli core install esp32:esp32
-
-    - name: Compile sketch
-      run: |
-        mkdir -p build
-        arduino-cli compile --fqbn esp32:esp32:esp32s3 -o build main.cpp
-
-    - name: Upload binary
-      uses: actions/upload-artifact@v4
-      with:
-        name: esp32s3-bin
-        path: build/*.bin
+      - name: Upload BIN
+        uses: actions/upload-artifact@v4
+        with:
+          name: esp32s3-bin
+          path: build/*.bin
