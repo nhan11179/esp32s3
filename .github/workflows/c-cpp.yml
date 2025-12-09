@@ -2,38 +2,47 @@ name: Build ESP32-S3
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   pull_request:
-    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+    - name: Checkout repo
+      uses: actions/checkout@v4
 
-    - name: Setup Python
+    - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.11'
+        python-version: '3.12'
 
-    - name: Install ESP32 Arduino CLI
+    - name: Install dependencies
       run: |
-        curl -fsSL https://downloads.arduino.cc/arduino-cli/arduino-cli_latest_Linux_64bit.tar.gz | tar xz
-        sudo mv arduino-cli /usr/local/bin/
-        arduino-cli config init
-        arduino-cli core update-index
-        arduino-cli core install esp32:esp32
+        sudo apt-get update
+        sudo apt-get install -y git wget unzip
 
-    - name: Build sketch
+    - name: Install Arduino CLI
+      run: |
+        wget https://downloads.arduino.cc/arduino-cli/arduino-cli_latest_Linux_64bit.tar.gz
+        tar -xzf arduino-cli_latest_Linux_64bit.tar.gz
+        sudo mv arduino-cli /usr/local/bin/
+
+    - name: Update Arduino core index
+      run: arduino-cli core update-index
+
+    - name: Install ESP32 core
+      run: arduino-cli core install esp32:esp32
+
+    - name: Compile sketch
       run: |
         mkdir -p build
-        arduino-cli compile --fqbn esp32:esp32:esp32s3 your_sketch_folder --output-dir build
+        arduino-cli compile --fqbn esp32:esp32:esp32s3 -o build main.cpp
 
-    - name: Upload artifact
-      uses: actions/upload-artifact@v3
+    - name: Upload binary
+      uses: actions/upload-artifact@v4
       with:
         name: esp32s3-bin
         path: build/*.bin
