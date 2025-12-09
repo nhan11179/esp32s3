@@ -27,9 +27,5 @@ jobs:
         run: mkdir -p build
 
       - name: Compile ESP32S3 sketch
-        run: arduino-cli compile \
-         -b esp32:esp32:esp32s3 \
-         --output-dir build \
-         --export-binaries \
-         ./lib
+        run: arduino-cli compile -b esp32:esp32:esp32s3 --output-dir build --export-binaries ./lib
   
