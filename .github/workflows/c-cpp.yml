@@ -2,21 +2,34 @@ name: Build ESP32-S3
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-    - name: Setup Arduino CLI
-      uses: arduino/setup-arduino-cli@v2
-    - name: Install ESP32 Core
-      run: arduino-cli core update-index && arduino-cli core install esp32:esp32
+      - name: Setup Arduino CLI
+        uses: arduino/setup-arduino-cli@v2
 
-    - name: Compile
-      run: arduino-cli compile --fqbn esp32:esp32:esp32s3 ./lib
+      - name: Update core index
+        run: arduino-cli core update-index
+
+      - name: Install ESP32 core
+        run: arduino-cli core install esp32:esp32
+
+      - name: Compile sketch
+        run: |
+          mkdir -p build
+          arduino-cli compile --fqbn esp32:esp32:esp32s3 --output-dir ./lib
+
+      - name: Upload bin artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: esp32s3-bin
+          path: build/*.bin
