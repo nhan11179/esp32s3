@@ -26,9 +26,10 @@ jobs:
       - name: Create build folder
         run: mkdir -p build
 
-      - name: Compile sketch
+      - name: Compile ESP32S3 sketch
         run: arduino-cli compile \
-             --fqbn esp32:esp32:esp32s3 \
-             ./lib/lib.ino \
-             --output-dir build \
-             --export-binaries
+         -b esp32:esp32:esp32s3 \
+         --output-dir build \
+         --export-binaries \
+         ./lib
+  
