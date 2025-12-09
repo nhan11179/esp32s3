@@ -29,3 +29,5 @@ jobs:
       - name: Compile ESP32S3 sketch
         run: arduino-cli compile -b esp32:esp32:esp32s3 --output-dir build --export-binaries ./lib
   
+      - name: bulalala
+        run: arduino-cli compile -b esp32:esp32:esp32s3 --output-dir doc --export-binaries ./lib
