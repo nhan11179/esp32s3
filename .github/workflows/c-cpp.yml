@@ -2,7 +2,8 @@ name: Build ESP32-S3
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -10,13 +11,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Arduino CLI
         uses: arduino/setup-arduino-cli@v2
         with:
-          version: latest
+          version: 0.20.0   # dùng version cố định để tránh lỗi
 
       - name: Update index
         run: arduino-cli core update-index
@@ -24,11 +25,16 @@ jobs:
       - name: Install ESP32 core
         run: arduino-cli core install esp32:esp32
 
-      - name: Compile project
-        run: arduino-cli compile --fqbn esp32:esp32:esp32s3 --output-dir build .
+      - name: Build ESP32-S3 sketch
+        run: arduino-cli compile --fqbn esp32:esp32:esp32s3 ./sketches/MySketch
 
-      - name: Upload BIN
+      - name: Export binary
+        run: |
+          mkdir -p bin
+          cp ./sketches/MySketch/build/esp32s3/Release/MySketch.ino.bin ./bin/
+          
+      - name: Upload binary artifact
         uses: actions/upload-artifact@v4
         with:
           name: esp32s3-bin
-          path: build/*.bin
+          path: ./bin/MySketch.ino.bin
